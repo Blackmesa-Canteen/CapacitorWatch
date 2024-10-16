@@ -9,7 +9,7 @@ export interface WatchPlugin {
   addListener(
     eventName: 'runCommand',
     listenerFunc: (data: { command: string }) => void
-  ): Promise<PluginListenerHandle> & PluginListenerHandle;
+  ): Promise<PluginListenerHandle>;
 
   /**
    * Replaces the current watch UI with watchUI

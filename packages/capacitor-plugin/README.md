@@ -228,6 +228,10 @@ npx cap sync
 * [`addListener('runCommand', ...)`](#addlistenerruncommand-)
 * [`updateWatchUI(...)`](#updatewatchui)
 * [`updateWatchData(...)`](#updatewatchdata)
+* [`setWatchStateData(...)`](#setwatchstatedata)
+* [`setWatchStateDataByKey(...)`](#setwatchstatedatabykey)
+* [`getWatchStateData()`](#getwatchstatedata)
+* [`getWatchStateDataByKey(...)`](#getwatchstatedatabykey)
 * [Interfaces](#interfaces)
 
 </docgen-index>
@@ -238,7 +242,7 @@ npx cap sync
 ### addListener('runCommand', ...)
 
 ```typescript
-addListener(eventName: 'runCommand', listenerFunc: (data: { command: string; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: 'runCommand', listenerFunc: (data: { command: string; }) => void) => Promise<PluginListenerHandle>
 ```
 
 Listen for a command from the watch
@@ -248,7 +252,7 @@ Listen for a command from the watch
 | **`eventName`**    | <code>'runCommand'</code>                            |
 | **`listenerFunc`** | <code>(data: { command: string; }) =&gt; void</code> |
 
-**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 --------------------
 
@@ -279,6 +283,66 @@ Updates the watch's state data
 | Param         | Type                                               |
 | ------------- | -------------------------------------------------- |
 | **`options`** | <code>{ data: { [key: string]: string; }; }</code> |
+
+--------------------
+
+
+### setWatchStateData(...)
+
+```typescript
+setWatchStateData(options: { data: { [key: string]: any; }; }) => Promise<void>
+```
+
+Sets the watch's state data
+
+| Param         | Type                                            |
+| ------------- | ----------------------------------------------- |
+| **`options`** | <code>{ data: { [key: string]: any; }; }</code> |
+
+--------------------
+
+
+### setWatchStateDataByKey(...)
+
+```typescript
+setWatchStateDataByKey(options: { key: string; value: any; }) => Promise<void>
+```
+
+Sets a specific key-value pair in the watch's state data
+
+| Param         | Type                                      |
+| ------------- | ----------------------------------------- |
+| **`options`** | <code>{ key: string; value: any; }</code> |
+
+--------------------
+
+
+### getWatchStateData()
+
+```typescript
+getWatchStateData() => Promise<{ data: { [key: string]: any; }; }>
+```
+
+Retrieves the watch's state data
+
+**Returns:** <code>Promise&lt;{ data: { [key: string]: any; }; }&gt;</code>
+
+--------------------
+
+
+### getWatchStateDataByKey(...)
+
+```typescript
+getWatchStateDataByKey(options: { key: string; }) => Promise<{ value: any; }>
+```
+
+Retrieves a specific value from the watch's state data by key
+
+| Param         | Type                          |
+| ------------- | ----------------------------- |
+| **`options`** | <code>{ key: string; }</code> |
+
+**Returns:** <code>Promise&lt;{ value: any; }&gt;</code>
 
 --------------------
 
