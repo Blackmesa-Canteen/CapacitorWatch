@@ -4,7 +4,7 @@ import WatchConnectivity
 
 @objc(WatchPlugin)
 public class WatchPlugin: CAPPlugin {
- 
+
     override public func load() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(self.handleApplicationActive(notification:)),
@@ -22,48 +22,86 @@ public class WatchPlugin: CAPPlugin {
                                                selector: #selector(self.handleCommandFromWatch(_:)),
                                                name: Notification.Name(COMMAND_KEY),
                                                object: nil)
-        
+
     }
-    
+
     @objc func handleApplicationActive(notification: NSNotification) {
         assert(WCSession.isSupported(), "This sample requires Watch Connectivity support!")
         WCSession.default.delegate = CapWatchSessionDelegate.shared
         WCSession.default.activate()
     }
-    
+
     @objc func handleUrlOpened(notification: NSNotification) {
-        
+
     }
 
     @objc func handleUniversalLink(notification: NSNotification) {
-        
+
     }
-    
+
     @objc func handleCommandFromWatch(_ notification: NSNotification) {
         if let command = notification.userInfo![COMMAND_KEY] as? String {
             print("WATCH process: \(command)")
             notifyListeners("runCommand", data: ["command": command])
         }
     }
-    
+
     @objc func updateWatchUI(_ call: CAPPluginCall) {
         guard let newUI = call.getString("watchUI")  else {
             return
         }
-        
+
         CapWatchSessionDelegate.shared.WATCH_UI = newUI
         CapWatchSessionDelegate.shared.sendUI()
-        
+
         call.resolve()
     }
-    
+
     @objc func updateWatchData(_ call: CAPPluginCall) {
         guard let newData = call.getObject("data") as? [String: String] else {
             return
         }
-        
+
         CapWatchSessionDelegate.shared.updateViewData(newData)
         call.resolve()
     }
-    
+
+    // extensions
+    @objc func setWatchStateData(_ call: CAPPluginCall) {
+        guard let data = call.getObject("data") else {
+            call.reject("Must provide data")
+            return
+        }
+
+        CapWatchSessionDelegate.shared.setWatchStateData(data)
+        call.resolve()
+    }
+
+    @objc func setWatchStateDataByKey(_ call: CAPPluginCall) {
+        guard let key = call.getString("key"), let value = call.get("value") else {
+            call.reject("Must provide key and value")
+            return
+        }
+
+        CapWatchSessionDelegate.shared.setWatchStateDataByKey(key, value: value)
+        call.resolve()
+    }
+
+    @objc func getWatchStateData(_ call: CAPPluginCall) {
+        let data = CapWatchSessionDelegate.shared.getWatchStateData()
+        call.resolve(["data": data])
+    }
+
+    @objc func getWatchStateDataByKey(_ call: CAPPluginCall) {
+        guard let key = call.getString("key") else {
+            call.reject("Must provide key")
+            return
+        }
+
+        if let value = CapWatchSessionDelegate.shared.getWatchStateDataByKey(key) {
+            call.resolve(["value": value])
+        } else {
+            call.reject("No value found for key \(key)")
+        }
+    }
 }
