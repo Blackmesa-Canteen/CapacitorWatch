@@ -67,41 +67,22 @@ public class WatchPlugin: CAPPlugin {
     }
 
     // extensions
-    @objc func setWatchStateData(_ call: CAPPluginCall) {
-        guard let data = call.getObject("data") else {
-            call.reject("Must provide data")
-            return
-        }
-
-        CapWatchSessionDelegate.shared.setWatchStateData(data)
+    @objc func updateWatchStateData(_ call: CAPPluginCall) {
+        let data = call.getObject("data") ?? [:]
+        CapWatchSessionDelegate.shared.updateWatchStateData(data)
         call.resolve()
     }
 
-    @objc func setWatchStateDataByKey(_ call: CAPPluginCall) {
-        guard let key = call.getString("key"), let value = call.get("value") else {
-            call.reject("Must provide key and value")
-            return
-        }
-
-        CapWatchSessionDelegate.shared.setWatchStateDataByKey(key, value: value)
+    @objc func updateWatchStateDataByKey(_ call: CAPPluginCall) {
+        let key = call.getString("key") ?? ""
+        let value = call.getAny("value")
+        CapWatchSessionDelegate.shared.updateWatchStateDataByKey(key, value: value)
         call.resolve()
     }
 
     @objc func getWatchStateData(_ call: CAPPluginCall) {
-        let data = CapWatchSessionDelegate.shared.getWatchStateData()
-        call.resolve(["data": data])
-    }
-
-    @objc func getWatchStateDataByKey(_ call: CAPPluginCall) {
-        guard let key = call.getString("key") else {
-            call.reject("Must provide key")
-            return
-        }
-
-        if let value = CapWatchSessionDelegate.shared.getWatchStateDataByKey(key) {
-            call.resolve(["value": value])
-        } else {
-            call.reject("No value found for key \(key)")
+        CapWatchSessionDelegate.shared.getWatchStateData { (stateData) in
+            call.resolve([STATE_DATA_KEY: stateData])
         }
     }
 }

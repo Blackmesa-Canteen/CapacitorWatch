@@ -8,8 +8,7 @@ CAP_PLUGIN(WatchPlugin, "Watch",
    CAP_PLUGIN_METHOD(updateWatchUI, CAPPluginReturnPromise);
    CAP_PLUGIN_METHOD(updateWatchData, CAPPluginReturnPromise);
 
-   CAP_PLUGIN_METHOD(setWatchStateData, CAPPluginReturnPromise);
-   CAP_PLUGIN_METHOD(setWatchStateDataByKey, CAPPluginReturnPromise);
+   CAP_PLUGIN_METHOD(updateWatchStateData, CAPPluginReturnPromise);
+   CAP_PLUGIN_METHOD(updateWatchStateDataByKey, CAPPluginReturnPromise);
    CAP_PLUGIN_METHOD(getWatchStateData, CAPPluginReturnPromise);
-   CAP_PLUGIN_METHOD(getWatchStateDataByKey, CAPPluginReturnPromise);
 );

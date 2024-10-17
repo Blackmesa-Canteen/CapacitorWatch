@@ -10,8 +10,6 @@ import CapacitorBackgroundRunner
 
 public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
     var WATCH_UI = ""
-    // extends for communication
-    var stateData: [String: Any] = [:]
 
     public static var shared = CapWatchSessionDelegate()
 
@@ -30,18 +28,32 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
         session.activate()
     }
 
-    public func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        var args: [String: Any] = [:]
-        args["message"] = message
+    public func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        if let stateData = message[STATE_DATA_KEY] as? [String: Any] {
+            // Handle state data specifically
+            var args: [String: Any] = [:]
+            args[STATE_DATA_KEY] = stateData
 
-        do {
-            try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveUserInfo", inputArgs: args)
-        } catch {
-            print(error)
+            do {
+                try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveStateData", inputArgs: args)
+            } catch {
+                print(error)
+            }
+        } else {
+            // Handle other messages
+            var args: [String: Any] = [:]
+            args["message"] = message
+
+            do {
+                try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveUserInfo", inputArgs: args)
+            } catch {
+                print(error)
+            }
         }
 
         handleWatchMessage(message)
     }
+
 
     public func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         handleWatchMessage(applicationContext)
@@ -90,40 +102,47 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
         }
 
         // extends for communication
-        if let data = userInfo[STATE_DATA_KEY] as? [String: Any] {
-            stateData = data
-        }
+        if let stateData = userInfo[STATE_DATA_KEY] as? [String: Any] {
+            // Notify the JavaScript side about the updated state data
+            var args: [String: Any] = [:]
+            args[STATE_DATA_KEY] = stateData
 
-        if let dataByKey = userInfo[STATE_DATA_BY_KEY] as? [String: Any] {
-            for (key, value) in dataByKey {
-                stateData[key] = value
+            do {
+                try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveStateData", inputArgs: args)
+            } catch {
+                print(error)
             }
         }
     }
 
-    // extends for communication
-    func setWatchStateData(_ data: [String: Any]) {
-            stateData = data
-            // Optionally, send this data to the watch
-            DispatchQueue.main.async {
-                let _ = WCSession.default.transferUserInfo([STATE_DATA_KEY: data])
-            }
+    // Functions to pass data from iPhone to watch state data
+    func updateWatchStateData(_ data: [String: Any]) {
+        DispatchQueue.main.async {
+            let _ = WCSession.default.transferUserInfo([STATE_DATA_KEY: data])
         }
+    }
 
-    func setWatchStateDataByKey(_ key: String, value: Any) {
-        stateData[key] = value
-        // Optionally, send this data to the watch
+    func updateWatchStateDataByKey(_ key: String, value: Any) {
         DispatchQueue.main.async {
             let _ = WCSession.default.transferUserInfo([STATE_DATA_BY_KEY: [key: value]])
         }
     }
 
-    func getWatchStateData() -> [String: Any] {
-        return stateData
-    }
-
-    func getWatchStateDataByKey(_ key: String) -> Any? {
-        return stateData[key]
+    func getWatchStateData(completion: @escaping ([String: Any]) -> Void) {
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage([WATCH_REQUEST_KEY: GET_STATE_DATA_REQUEST], replyHandler: { response in
+                if let stateData = response[STATE_DATA_KEY] as? [String: Any] {
+                    completion(stateData)
+                } else {
+                    completion([:])
+                }
+            }, errorHandler: { error in
+                print("Error retrieving state data: \(error)")
+                completion([:])
+            })
+        } else {
+            completion([:])
+        }
     }
 
     #endif

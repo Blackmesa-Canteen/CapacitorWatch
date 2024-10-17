@@ -17,3 +17,6 @@ public let COMMAND_KEY = "jsCommand"
 public let STATE_DATA_KEY = "watchStateData"
 public let STATE_DATA_BY_KEY = "watchStateDataByKey"
 
+public let WATCH_REQUEST_KEY = "watchRequest"
+public let GET_STATE_DATA_REQUEST = "getWatchStateDataRequest"
+
