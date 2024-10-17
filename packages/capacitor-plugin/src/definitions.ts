@@ -30,4 +30,9 @@ export interface WatchPlugin {
    * Updates a specific key-value pair in the watch's state data
    */
   updateWatchStateDataByKey(options: { key: string, value: any }): Promise<void>;
+
+    /**
+     * Get the current state data of the watch
+     */
+  getWatchStateData(): Promise<{ [key: string]: any }>;
 }

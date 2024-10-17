@@ -35,7 +35,7 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
             args[STATE_DATA_KEY] = stateData
 
             do {
-                try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveStateData", inputArgs: args)
+                try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveWatchStateData", inputArgs: args)
             } catch {
                 print(error)
             }
@@ -99,19 +99,6 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
         if let command = userInfo[COMMAND_KEY] as? String {
             print("PHONE process: \(command)")
             commandToJS(command)
-        }
-
-        // extends for communication
-        if let stateData = userInfo[STATE_DATA_KEY] as? [String: Any] {
-            // Notify the JavaScript side about the updated state data
-            var args: [String: Any] = [:]
-            args[STATE_DATA_KEY] = stateData
-
-            do {
-                try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveStateData", inputArgs: args)
-            } catch {
-                print(error)
-            }
         }
     }
 

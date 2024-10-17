@@ -10,6 +10,13 @@ import WatchConnectivity
 import SwiftUI
 
 public class WatchViewModel: NSObject, WCSessionDelegate, ObservableObject {
+    public func sessionDidBecomeInactive(_ session: WCSession) {
+    }
+    
+    public func sessionDidDeactivate(_ session: WCSession) {
+        self.session.activate()
+    }
+    
     var session: WCSession
 
     public static var shared = WatchViewModel()
@@ -86,8 +93,8 @@ public class WatchViewModel: NSObject, WCSessionDelegate, ObservableObject {
 
             if let request = userInfo[WATCH_REQUEST_KEY] as? String, request == GET_STATE_DATA_REQUEST {
                 let stateData = self.stateData
-                if session.isReachable {
-                    session.sendMessage([STATE_DATA_KEY: stateData], replyHandler: nil, errorHandler: { error in
+                if self.session.isReachable {
+                    self.session.sendMessage([STATE_DATA_KEY: stateData], replyHandler: nil, errorHandler: { error in
                         print("Error sending state data to iPhone: \(error.localizedDescription)")
                     })
                 }

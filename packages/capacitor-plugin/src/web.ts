@@ -22,4 +22,8 @@ export class WatchWeb extends WebPlugin implements WatchPlugin {
   async updateWatchStateDataByKey(_options: { key: string, value: any }): Promise<void> {
     return Promise.reject('method not implemented on web');
   }
+
+  async getWatchStateData(): Promise<{ [key: string]: any }> {
+    return Promise.reject('method not implemented on web');
+  }
 }
