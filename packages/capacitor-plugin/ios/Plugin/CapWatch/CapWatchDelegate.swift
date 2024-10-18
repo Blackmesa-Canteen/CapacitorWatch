@@ -29,29 +29,36 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
     }
 
     public func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        print("PHONE got didReceiveMessage: \(message)")
         if let stateData = message[STATE_DATA_KEY] as? [String: Any] {
             // Handle state data specifically
             var args: [String: Any] = [:]
             args[STATE_DATA_KEY] = stateData
+
+            print("PHONE got STATE_DATA_KEY: \(stateData)")
 
             do {
                 try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveWatchStateData", inputArgs: args)
             } catch {
                 print(error)
             }
+
+            handleWatchStateData(stateData)
         } else {
             // Handle other messages
             var args: [String: Any] = [:]
             args["message"] = message
+
+            print("PHONE got message: \(message)")
 
             do {
                 try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveUserInfo", inputArgs: args)
             } catch {
                 print(error)
             }
-        }
 
-        handleWatchMessage(message)
+            handleWatchMessage(message)
+        }
     }
 
 
@@ -64,6 +71,8 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
         var args: [String: Any] = [:]
         args["userInfo"] = userInfo
 
+        print("PHONE got userInfo: \(userInfo)")
+        print("PHONE got args: \(args)")
         do {
             try BackgroundRunner.shared.dispatchEvent(event: "WatchConnectivity_didReceiveUserInfo", inputArgs: args)
         } catch {
@@ -89,6 +98,12 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
                                         userInfo: [COMMAND_KEY: command])
     }
 
+    func watchStateDataToJS(_ stateData: [String: Any]) {
+        NotificationCenter.default.post(name: Notification.Name(STATE_DATA_KEY),
+                                        object: nil,
+                                        userInfo: [STATE_DATA_KEY: stateData])
+    }
+
     func handleWatchMessage(_ userInfo: [String: Any]) {
         if let command = userInfo[REQUESTUI_KEY] as? String {
             if command == REQUESTUI_VALUE {
@@ -97,9 +112,14 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
         }
 
         if let command = userInfo[COMMAND_KEY] as? String {
-            print("PHONE process: \(command)")
+            print("PHONE process command: \(command)")
             commandToJS(command)
         }
+    }
+
+    func handleWatchStateData(_ stateData: [String: Any]) {
+        print("PHONE process watch state data: \(stateData)")
+        watchStateDataToJS(stateData)
     }
 
     // Functions to pass data from iPhone to watch state data
@@ -116,13 +136,12 @@ public class CapWatchSessionDelegate : NSObject, WCSessionDelegate {
     }
 
     func getWatchStateData(completion: @escaping ([String: Any]) -> Void) {
+        print("PHONE getWatchStateData")
         if WCSession.default.isReachable {
+            print("is going to transfer watch state data info: ", [WATCH_REQUEST_KEY: GET_STATE_DATA_REQUEST])
             WCSession.default.sendMessage([WATCH_REQUEST_KEY: GET_STATE_DATA_REQUEST], replyHandler: { response in
-                if let stateData = response[STATE_DATA_KEY] as? [String: Any] {
-                    completion(stateData)
-                } else {
-                    completion([:])
-                }
+                print("completion stateData: \(response)")
+                completion(response)
             }, errorHandler: { error in
                 print("Error retrieving state data: \(error)")
                 completion([:])

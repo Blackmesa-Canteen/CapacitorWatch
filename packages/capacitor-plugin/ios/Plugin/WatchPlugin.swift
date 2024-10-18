@@ -22,6 +22,10 @@ public class WatchPlugin: CAPPlugin {
                                                selector: #selector(self.handleCommandFromWatch(_:)),
                                                name: Notification.Name(COMMAND_KEY),
                                                object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(self.handleWatchStateDataFromWatch(_:)),
+                                               name: Notification.Name(STATE_DATA_KEY),
+                                               object: nil)
 
     }
 
@@ -43,6 +47,13 @@ public class WatchPlugin: CAPPlugin {
         if let command = notification.userInfo![COMMAND_KEY] as? String {
             print("WATCH process: \(command)")
             notifyListeners("runCommand", data: ["command": command])
+        }
+    }
+
+    @objc func handleWatchStateDataFromWatch(_ notification: NSNotification) {
+        if let stateData = notification.userInfo![STATE_DATA_KEY] as? [String: Any] {
+            print("WATCH process: \(stateData)")
+            notifyListeners("watchStateData", data: stateData)
         }
     }
 

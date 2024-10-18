@@ -226,13 +226,14 @@ npx cap sync
 <docgen-index>
 
 * [`addListener('runCommand', ...)`](#addlistenerruncommand-)
+* [`addListener('watchStateData', ...)`](#addlistenerwatchstatedata-)
 * [`updateWatchUI(...)`](#updatewatchui)
 * [`updateWatchData(...)`](#updatewatchdata)
-* [`setWatchStateData(...)`](#setwatchstatedata)
-* [`setWatchStateDataByKey(...)`](#setwatchstatedatabykey)
+* [`updateWatchStateData(...)`](#updatewatchstatedata)
+* [`updateWatchStateDataByKey(...)`](#updatewatchstatedatabykey)
 * [`getWatchStateData()`](#getwatchstatedata)
-* [`getWatchStateDataByKey(...)`](#getwatchstatedatabykey)
 * [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -251,6 +252,24 @@ Listen for a command from the watch
 | ------------------ | ---------------------------------------------------- |
 | **`eventName`**    | <code>'runCommand'</code>                            |
 | **`listenerFunc`** | <code>(data: { command: string; }) =&gt; void</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
+
+--------------------
+
+
+### addListener('watchStateData', ...)
+
+```typescript
+addListener(eventName: 'watchStateData', listenerFunc: (data: Record<string, string>) => void) => Promise<PluginListenerHandle>
+```
+
+Listen for stateData from the watch
+
+| Param              | Type                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **`eventName`**    | <code>'watchStateData'</code>                                                      |
+| **`listenerFunc`** | <code>(data: <a href="#record">Record</a>&lt;string, string&gt;) =&gt; void</code> |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
@@ -287,13 +306,13 @@ Updates the watch's state data
 --------------------
 
 
-### setWatchStateData(...)
+### updateWatchStateData(...)
 
 ```typescript
-setWatchStateData(options: { data: { [key: string]: any; }; }) => Promise<void>
+updateWatchStateData(options: { data: { [key: string]: any; }; }) => Promise<void>
 ```
 
-Sets the watch's state data
+Updates the entire watch state data
 
 | Param         | Type                                            |
 | ------------- | ----------------------------------------------- |
@@ -302,13 +321,13 @@ Sets the watch's state data
 --------------------
 
 
-### setWatchStateDataByKey(...)
+### updateWatchStateDataByKey(...)
 
 ```typescript
-setWatchStateDataByKey(options: { key: string; value: any; }) => Promise<void>
+updateWatchStateDataByKey(options: { key: string; value: any; }) => Promise<void>
 ```
 
-Sets a specific key-value pair in the watch's state data
+Updates a specific key-value pair in the watch's state data
 
 | Param         | Type                                      |
 | ------------- | ----------------------------------------- |
@@ -320,29 +339,12 @@ Sets a specific key-value pair in the watch's state data
 ### getWatchStateData()
 
 ```typescript
-getWatchStateData() => Promise<{ data: { [key: string]: any; }; }>
+getWatchStateData() => Promise<{ [key: string]: any; }>
 ```
 
-Retrieves the watch's state data
+Get the current state data of the watch
 
-**Returns:** <code>Promise&lt;{ data: { [key: string]: any; }; }&gt;</code>
-
---------------------
-
-
-### getWatchStateDataByKey(...)
-
-```typescript
-getWatchStateDataByKey(options: { key: string; }) => Promise<{ value: any; }>
-```
-
-Retrieves a specific value from the watch's state data by key
-
-| Param         | Type                          |
-| ------------- | ----------------------------- |
-| **`options`** | <code>{ key: string; }</code> |
-
-**Returns:** <code>Promise&lt;{ value: any; }&gt;</code>
+**Returns:** <code>Promise&lt;{ [key: string]: any; }&gt;</code>
 
 --------------------
 
@@ -355,5 +357,15 @@ Retrieves a specific value from the watch's state data by key
 | Prop         | Type                                      |
 | ------------ | ----------------------------------------- |
 | **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+
+
+### Type Aliases
+
+
+#### Record
+
+Construct a type with a set of properties K of type T
+
+<code>{ [P in K]: T; }</code>
 
 </docgen-api>

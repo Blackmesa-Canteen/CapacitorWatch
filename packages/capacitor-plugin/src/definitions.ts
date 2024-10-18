@@ -12,6 +12,14 @@ export interface WatchPlugin {
   ): Promise<PluginListenerHandle>;
 
   /**
+   * Listen for stateData from the watch
+   */
+  addListener(
+      eventName: 'watchStateData',
+      listenerFunc: (data: Record<string, string>) => void
+  ): Promise<PluginListenerHandle>;
+
+  /**
    * Replaces the current watch UI with watchUI
    */
   updateWatchUI(options: { watchUI: string }): Promise<void>;

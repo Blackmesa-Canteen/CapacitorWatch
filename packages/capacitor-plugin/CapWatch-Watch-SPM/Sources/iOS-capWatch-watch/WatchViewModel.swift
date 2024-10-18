@@ -12,11 +12,11 @@ import SwiftUI
 public class WatchViewModel: NSObject, WCSessionDelegate, ObservableObject {
     public func sessionDidBecomeInactive(_ session: WCSession) {
     }
-    
+
     public func sessionDidDeactivate(_ session: WCSession) {
         self.session.activate()
     }
-    
+
     var session: WCSession
 
     public static var shared = WatchViewModel()
@@ -56,6 +56,24 @@ public class WatchViewModel: NSObject, WCSessionDelegate, ObservableObject {
         handlePhoneMessage(message)
     }
 
+    public func session(_ session: WCSession,
+                        didReceiveMessage message: [String: Any],
+                        replyHandler: @escaping ([String: Any]) -> Void) {
+        print("Watch get didReceiveMessage with replyHandler, message: \(message)")
+        // Check if the message contains the correct request key
+        if let request = message[WATCH_REQUEST_KEY] as? String, request == GET_STATE_DATA_REQUEST {
+            // Prepare the state data to send back
+            let stateData: [String: Any] = self.stateData
+
+            // Send the state data back using the reply handler
+            print("replying with state data: \(stateData)")
+            replyHandler(stateData)
+        } else {
+            // If the request key doesn't match, send an empty response or handle accordingly
+            replyHandler([:])
+        }
+    }
+
     public func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
         handlePhoneMessage(applicationContext)
     }
@@ -88,15 +106,6 @@ public class WatchViewModel: NSObject, WCSessionDelegate, ObservableObject {
             if let receivedStateDataByKey = userInfo[STATE_DATA_BY_KEY] as? [String: Any] {
                 for (key, value) in receivedStateDataByKey {
                     self.stateData[key] = value
-                }
-            }
-
-            if let request = userInfo[WATCH_REQUEST_KEY] as? String, request == GET_STATE_DATA_REQUEST {
-                let stateData = self.stateData
-                if self.session.isReachable {
-                    self.session.sendMessage([STATE_DATA_KEY: stateData], replyHandler: nil, errorHandler: { error in
-                        print("Error sending state data to iPhone: \(error.localizedDescription)")
-                    })
                 }
             }
         }
