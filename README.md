@@ -165,6 +165,44 @@ Will produce this:
 
 <img src="https://raw.githubusercontent.com/ionic-team/CapacitorWatch/main/img/example-watchui.png" />
 
+### UI extensions
+I fixed template parsing logic, and added some new UI: Divider and Map
+
+code example:
+```typescript
+export const watchUITemplate = {
+  default: `Text("Please wait for KM2ME to start")`,
+  trackingWithoutLine: `
+  Button("Show Toast", "inc")
+  Text("Number test: $number")
+  Divider()
+  Text("Line not picked.")
+  Divider()
+  Text("Show Lat: $lat")
+  Text("Show Lng: $lng")
+  Divider()
+  Map("$mapCoor")
+`,
+  tracking: `
+  Button("Show Toast", "inc")
+  Text("Number test: $number")
+  Divider()
+  Text("Kilometerage: $kilometerage")
+  Divider()
+  Text("Corridor: $corridor")
+  Text("Network Control Board: $networkControlBoard")
+  Text("Base Code: $baseCode")
+  Divider()
+  Text("Speed: $speed")
+  Text("Offset: $offset")
+  Text("Accuracy: $accuracy")
+  Divider()
+  Text("Show Lat: $lat")
+  Text("Show Lng: $lng")
+  Divider()
+  Map("$mapCoor")`,
+};
+```
 ## Communicating with the watch
 
 This article provides a great summary on the native methods and their implications: https://alexanderweiss.dev/blog/2023-01-18-three-ways-to-communicate-via-watchconnectivity
@@ -186,6 +224,50 @@ Watch.addListener("runCommand", (data: {command: string}) => {
 ```
 
 The commands are the 2nd paramter in the `Button()` definition of the watch UI. This can be any string.
+
+### Communication Extensions
+
+We have a data structure in the AppleWatch side to hold the state data. With the plugin the iPhone can update, get and listen to changes in the state data.
+
+1. get WatchStateData example:
+```typescript
+  public async getWatchStateData(): Promise<void> {
+    const stateData = await Watch.getWatchStateData();
+    console.log('Watch State Data@@:', stateData);
+    console.log(
+        'Watch State Data from getWatchStateData@@:',
+        stateData.watchStateData,
+    );
+    this.watchStateDataArray = Object.entries(stateData);
+    this.cdr.markForCheck();
+}
+```
+
+2. update WatchStateData example:
+```typescript
+  public async updateWatchStateDataFromPhone() {
+    await Watch.updateWatchStateData({
+        data: {
+            test: `Test from Phone: ${new Date().toISOString()}`,
+        },
+    });
+    console.log('Watch State Data Updated');
+}
+```
+
+3. Add WatchStateDataChangeListner example:
+```typescript
+  private addWatchStateDataChangeListener() {
+    Watch.addListener('watchStateData', (stateData: Record<string, any>) => {
+        console.log('Watch State Data Received:', stateData);
+        if (!stateData) {
+            return;
+        }
+        this.watchStateDataArray = Object.entries(stateData);
+        this.cdr.markForCheck();
+    });
+}
+```
 
 ## Updating watch data
 

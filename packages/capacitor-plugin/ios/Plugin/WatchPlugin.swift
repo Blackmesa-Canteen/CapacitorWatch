@@ -93,7 +93,7 @@ public class WatchPlugin: CAPPlugin {
 
     @objc func getWatchStateData(_ call: CAPPluginCall) {
         CapWatchSessionDelegate.shared.getWatchStateData { (stateData) in
-            call.resolve([STATE_DATA_KEY: stateData])
+            call.resolve(stateData)
         }
     }
 }
